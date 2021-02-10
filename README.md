@@ -1,2 +1,2 @@
-# template-typescript
-Template repository for GitHub typescript actions
+# push-back
+Push Git commits back to the repository
