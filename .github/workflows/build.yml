@@ -63,7 +63,7 @@ jobs:
         HEAD_COMMIT_SHA=$(git rev-parse HEAD)
         REMOTE_HEAD_COMMIT_SHA=$(git ls-remote "$REMOTE_URL" "${{ github.ref }}" | awk '{ print $1}')
         if [ "$REMOTE_HEAD_COMMIT_SHA" != "$HEAD_COMMIT_SHA" ]; then
-          echo "::warning::Remote repository branch has been changed, skipping push back"
+          echo "::warning::Remote repository branch has been changed, skipping tag creation"
           exit 0
         fi
 
