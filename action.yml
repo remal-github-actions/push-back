@@ -5,6 +5,32 @@ inputs:
   githubToken:
     required: true
     description: GitHub access token with at least 'public_repo' (use 'repo' scope instead of 'public_repo' for private repositories)
+  message:
+    required: true
+    description: Commit message
+  files:
+    required: false
+    description: Delimited be new line character list of files or directories to commit. All files will be commited if not set.
+  committerName:
+    required: false
+    description: Committer name
+  committerEmail:
+    required: false
+    description: Committer email
+  forcePush:
+    required: true
+    default: 'false'
+    description: Set to 'true' to enable force push
+  targetBranch:
+    required: false
+    description: Branch to push to
+
+outputs:
+  result:
+    description: >-
+      'nothing-changed' - no files were changed, nothing to commit;
+      'remote-changed' - remote repository branch has been changed, push-back is skipped;
+      'pushed-successfully' - pushed successfully;
 
 runs:
   using: node12
