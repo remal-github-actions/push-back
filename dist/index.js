@@ -131,7 +131,7 @@ function run() {
                     core.info(`Committer email: ${email}`);
                     yield git.addConfig('user.email', email);
                 }));
-                yield core.group('Committing files', () => __awaiter(this, void 0, void 0, function* () {
+                yield core.group(`Committing ${filesToCommit.length} files`, () => __awaiter(this, void 0, void 0, function* () {
                     if (files.length > 0) {
                         yield git.add(files);
                     }
