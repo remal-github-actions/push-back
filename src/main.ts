@@ -30,6 +30,19 @@ async function run(): Promise<void> {
             require('debug').enable('simple-git')
         }
         const git = simpleGit(workspacePath)
+        const currentBranchName = await getCurrentBranchName(git)
+        const targetBranch = (function () {
+            const targetBranchInput = core.getInput('targetBranch')
+            if (targetBranchInput) {
+                return targetBranchInput
+            }
+            if (currentBranchName === 'HEAD') {
+                throw new Error("targetBranch' input parameter should be set, as HEAD is detached from any branch")
+            }
+            return currentBranchName
+        })()
+
+
         const filesToCommit = await core.group('Checking Git status', async () => {
             const changedFiles = await git.status(files)
                 .then(response => response.files)
@@ -129,7 +142,6 @@ async function run(): Promise<void> {
             })
 
 
-            const targetBranch = core.getInput('targetBranch') || await getCurrentBranchName(git)
             const forcePush = core.getInput('forcePush').toLowerCase() === 'true'
             const isRemoteChanged = await core.group(
                 `Pushing changes to '${targetBranch}' branch${forcePush ? ' (force push enabled)' : ''}`,
