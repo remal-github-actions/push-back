@@ -137,7 +137,7 @@ async function run(): Promise<void> {
                     if (!forcePush) {
                         const targetLatestCommitSha = await getLatestCommitSha(git, pushRemoteName, targetBranch)
                         if (targetLatestCommitSha) {
-                            core.info(`Target branch last commit SHA: ${targetLatestCommitSha}`)
+                            core.info(`Target remote branch last commit SHA: ${targetLatestCommitSha}`)
                             if (targetLatestCommitSha !== currentCommitSha) {
                                 core.warning(`Remote repository branch '${targetBranch}' has been changed, skipping push back`)
                                 core.setOutput('result', RESULT.REMOTE_CHANGED)
