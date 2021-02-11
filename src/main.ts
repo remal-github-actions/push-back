@@ -161,7 +161,6 @@ async function run(): Promise<void> {
                 core.setOutput('result', RESULT.PUSHED_SUCCESSFULLY)
             }
 
-
         } catch (error) {
             core.setFailed(error)
         } finally {
