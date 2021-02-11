@@ -76,13 +76,14 @@ async function run(): Promise<void> {
             })
 
 
-            await core.group('Commiting files', async () => {
+            await core.group('Committing files', async () => {
                 if (files.length > 0) {
                     await git.add(files)
                 } else {
                     await git.add(['.'])
                 }
                 await git.commit(message, files)
+                core.info(`${filesToCommit.length} files committed`)
             })
 
 
@@ -134,7 +135,7 @@ async function run(): Promise<void> {
                 `Pushing changes to '${targetBranch}' branch${forcePush ? ' (force push enabled)' : ''}`,
                 async () => {
                     if (!forcePush) {
-                        const targetLatestCommitSha = await git.listRemote([pushRemoteName, targetBranch])
+                        const targetLatestCommitSha = await getLatestCommitSha(git, pushRemoteName, targetBranch)
                         if (targetLatestCommitSha) {
                             core.info(`Target branch last commit SHA: ${targetLatestCommitSha}`)
                             if (targetLatestCommitSha !== currentCommitSha) {
@@ -195,4 +196,10 @@ async function getCurrentCommitSha(git: SimpleGit): Promise<string> {
 async function getCurrentBranchName(git: SimpleGit): Promise<string> {
     return git.raw('rev-parse', '--abbrev-ref', 'HEAD')
         .then(text => text.trim())
+}
+
+async function getLatestCommitSha(git: SimpleGit, remoteName: string, remoteBranch: string): Promise<string> {
+    return git.listRemote([remoteName, remoteBranch])
+        .then(text => text.trim())
+        .then(text => text.split(/\s/)[0])
 }
