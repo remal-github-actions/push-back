@@ -11,12 +11,26 @@ inputs:
   files:
     required: false
     description: Delimited be new line character list of files or directories to commit. All files will be commited if not set.
-  user:
+  committerName:
     required: false
-    description: Git committer name
-  email:
+    description: Committer name
+  committerEmail:
     required: false
-    description: Git committer email
+    description: Committer email
+  forcePush:
+    required: true
+    default: 'false'
+    description: Set to 'true' to enable force push
+  targetBranch:
+    required: false
+    description: Branch to push to
+
+outputs:
+  result:
+    description: >-
+      'nothing-changed' - no files were changed, nothing to commit;
+      'remote-changed' - remote repository branch has been changed, push-back is skipped;
+      'pushed-successfully' - pushed successfully;
 
 runs:
   using: node12
