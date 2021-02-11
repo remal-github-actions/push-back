@@ -131,7 +131,7 @@ async function run(): Promise<void> {
 
             const targetBranch = core.getInput('targetBranch') || await getCurrentBranchName(git)
             const forcePush = core.getInput('forcePush').toLowerCase() === 'true'
-            await core.group(
+            const isRemoteChanged = await core.group(
                 `Pushing changes to '${targetBranch}' branch${forcePush ? ' (force push enabled)' : ''}`,
                 async () => {
                     if (!forcePush) {
@@ -139,9 +139,7 @@ async function run(): Promise<void> {
                         if (targetLatestCommitSha) {
                             core.info(`Target remote branch last commit SHA: ${targetLatestCommitSha}`)
                             if (targetLatestCommitSha !== currentCommitSha) {
-                                core.warning(`Remote repository branch '${targetBranch}' has been changed, skipping push back`)
-                                core.setOutput('result', RESULT.REMOTE_CHANGED)
-                                return
+                                return true
                             }
                         } else {
                             core.info("Target branch doesn't exist")
@@ -153,9 +151,15 @@ async function run(): Promise<void> {
                         await git.push(pushRemoteName, `HEAD:${targetBranch}`, ['--force'])
                     }
 
-                    core.setOutput('result', RESULT.PUSHED_SUCCESSFULLY)
+                    return false
                 }
             )
+            if (isRemoteChanged) {
+                core.warning(`Remote repository branch '${targetBranch}' has been changed, skipping push back`)
+                core.setOutput('result', RESULT.REMOTE_CHANGED)
+            } else {
+                core.setOutput('result', RESULT.PUSHED_SUCCESSFULLY)
+            }
 
 
         } catch (error) {
