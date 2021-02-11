@@ -30,12 +30,12 @@ async function run(): Promise<void> {
             require('debug').enable('simple-git')
         }
         const git = simpleGit(workspacePath)
+        const currentBranchName = await getCurrentBranchName(git)
         const targetBranch = (function () {
             const targetBranchInput = core.getInput('targetBranch')
             if (targetBranchInput) {
                 return targetBranchInput
             }
-            const currentBranchName = await getCurrentBranchName(git)
             if (currentBranchName === 'HEAD') {
                 throw new Error("targetBranch' input parameter should be set, as HEAD is detached from any branch")
             }
