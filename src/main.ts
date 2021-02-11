@@ -30,10 +30,12 @@ async function run(): Promise<void> {
             require('debug').enable('simple-git')
         }
         const git = simpleGit(workspacePath)
-        const filesToCommit = await core.group('Checking Git status', async () =>
-            git.status(files)
+        const filesToCommit = await core.group('Checking Git status', async () => {
+            const changedFiles = await git.status(files)
                 .then(response => response.files)
-        )
+            core.info(`${changedFiles.length} files changed`)
+            return changedFiles
+        })
         if (filesToCommit.length === 0) {
             core.info('No files were changed, nothing to commit')
             core.setOutput('result', RESULT.NOTHING_CHANGED)
@@ -105,11 +107,6 @@ async function run(): Promise<void> {
                     prevConfigValues[extraHeaderConfigKey] = configuredExtraHeader
                 }
 
-                core.info('Setting up credentials')
-                const basicCredentials = Buffer.from(`x-access-token:${githubToken}`, 'utf8').toString('base64')
-                core.setSecret(basicCredentials)
-                await git.addConfig(extraHeaderConfigKey, `Authorization: basic ${basicCredentials}`)
-
                 core.debug('Adding remote')
                 const remoteUrl = new URL(serverUrl.toString())
                 if (!remoteUrl.pathname.endsWith('/')) {
@@ -123,6 +120,11 @@ async function run(): Promise<void> {
                     remoteUrl.toString()
                 )
                 core.info(`Remote added: ${remoteUrl.toString()}`)
+
+                core.info('Setting up credentials')
+                const basicCredentials = Buffer.from(`x-access-token:${githubToken}`, 'utf8').toString('base64')
+                core.setSecret(basicCredentials)
+                await git.addConfig(extraHeaderConfigKey, `Authorization: basic ${basicCredentials}`)
             })
 
 
@@ -187,8 +189,10 @@ async function getGitConfig(git: SimpleGit, configKey: string, defaultValue: str
 
 async function getCurrentCommitSha(git: SimpleGit): Promise<string> {
     return git.raw('rev-parse', 'HEAD')
+        .then(text => text.trim())
 }
 
 async function getCurrentBranchName(git: SimpleGit): Promise<string> {
     return git.raw('rev-parse', '--abbrev-ref', 'HEAD')
+        .then(text => text.trim())
 }
