@@ -83,16 +83,16 @@ function run() {
                 __nccwpck_require__(8231).enable('simple-git');
             }
             const git = simple_git_1.default(workspacePath_1.default);
-            const currentBranchName = yield getCurrentBranchName(git);
+            const currentBranch = yield getCurrentBranchName(git);
             const targetBranch = (function () {
                 const targetBranchInput = core.getInput('targetBranch');
                 if (targetBranchInput) {
                     return targetBranchInput;
                 }
-                if (currentBranchName === 'HEAD') {
+                if (currentBranch === 'HEAD') {
                     throw new Error("targetBranch' input parameter should be set, as HEAD is detached from any branch");
                 }
-                return currentBranchName;
+                return currentBranch;
             })();
             const filesToCommit = yield core.group('Checking Git status', () => __awaiter(this, void 0, void 0, function* () {
                 const changedFiles = yield git.status(files)
