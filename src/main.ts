@@ -89,7 +89,7 @@ async function run(): Promise<void> {
             })
 
 
-            await core.group('Committing files', async () => {
+            await core.group(`Committing ${filesToCommit.length} files`, async () => {
                 if (files.length > 0) {
                     await git.add(files)
                 } else {
