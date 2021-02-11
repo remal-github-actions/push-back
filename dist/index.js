@@ -83,6 +83,17 @@ function run() {
                 __nccwpck_require__(8231).enable('simple-git');
             }
             const git = simple_git_1.default(workspacePath_1.default);
+            const currentBranchName = yield getCurrentBranchName(git);
+            const targetBranch = (function () {
+                const targetBranchInput = core.getInput('targetBranch');
+                if (targetBranchInput) {
+                    return targetBranchInput;
+                }
+                if (currentBranchName === 'HEAD') {
+                    throw new Error("targetBranch' input parameter should be set, as HEAD is detached from any branch");
+                }
+                return currentBranchName;
+            })();
             const filesToCommit = yield core.group('Checking Git status', () => __awaiter(this, void 0, void 0, function* () {
                 const changedFiles = yield git.status(files)
                     .then(response => response.files);
@@ -161,7 +172,6 @@ function run() {
                     core.setSecret(basicCredentials);
                     yield git.addConfig(extraHeaderConfigKey, `Authorization: basic ${basicCredentials}`);
                 }));
-                const targetBranch = core.getInput('targetBranch') || (yield getCurrentBranchName(git));
                 const forcePush = core.getInput('forcePush').toLowerCase() === 'true';
                 const isRemoteChanged = yield core.group(`Pushing changes to '${targetBranch}' branch${forcePush ? ' (force push enabled)' : ''}`, () => __awaiter(this, void 0, void 0, function* () {
                     if (!forcePush) {
