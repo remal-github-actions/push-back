@@ -214,7 +214,7 @@ async function getCurrentBranchName(git: SimpleGit): Promise<string> {
 }
 
 async function getLatestCommitSha(git: SimpleGit, remoteName: string, remoteBranch: string): Promise<string> {
-    return git.listRemote([remoteName, remoteBranch])
+    return git.listRemote([remoteName, `refs/heads/${remoteBranch}`])
         .then(text => text.trim())
         .then(text => text.split(/\s/)[0])
 }
