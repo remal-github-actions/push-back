@@ -1,5 +1,4 @@
 import * as core from '@actions/core'
-import {context} from '@actions/github'
 import simpleGit from 'simple-git'
 import {SimpleGit} from 'simple-git/promise'
 import workspacePath from './internal/workspacePath'
@@ -16,6 +15,11 @@ const RESULT = {
 
 async function run(): Promise<void> {
     try {
+        const repositoryFullName = process.env.GITHUB_REPOSITORY
+        if (!repositoryFullName) {
+            throw new Error('GITHUB_REPOSITORY not defined')
+        }
+
         const githubToken = core.getInput('githubToken', {required: true})
         core.setSecret(githubToken)
 
@@ -73,7 +77,10 @@ async function run(): Promise<void> {
                     prevConfigValues['user.name'] = configuredName
                 }
 
-                const name = core.getInput('committerName') || configuredName || context.actor || context.repo.owner
+                const name = core.getInput('committerName')
+                    || configuredName
+                    || process.env.GITHUB_ACTOR
+                    || repositoryFullName.split('/')[0]
                 core.info(`Committer name: ${name}`)
                 await git.addConfig('user.name', name)
 
@@ -126,7 +133,7 @@ async function run(): Promise<void> {
                 if (!remoteUrl.pathname.endsWith('/')) {
                     remoteUrl.pathname += '/'
                 }
-                remoteUrl.pathname += `${context.repo.owner}/${context.repo.repo}.git`
+                remoteUrl.pathname += `${repositoryFullName}.git`
                 remoteUrl.search = ''
                 remoteUrl.hash = ''
                 await git.addRemote(
