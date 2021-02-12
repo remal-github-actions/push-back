@@ -97,11 +97,7 @@ async function run(): Promise<void> {
 
 
             await core.group(`Committing ${filesToCommit.length} files`, async () => {
-                if (files.length > 0) {
-                    await git.add(files)
-                } else {
-                    await git.add(['.'])
-                }
+                await git.raw(['add', '--all', ...files])
                 await git.commit(message, files)
                 core.info(`${filesToCommit.length} files committed`)
             })
