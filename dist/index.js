@@ -243,7 +243,7 @@ function getCurrentBranchName(git) {
 }
 function getLatestCommitSha(git, remoteName, remoteBranch) {
     return __awaiter(this, void 0, void 0, function* () {
-        return git.listRemote([remoteName, remoteBranch])
+        return git.listRemote([remoteName, `refs/heads/${remoteBranch}`])
             .then(text => text.trim())
             .then(text => text.split(/\s/)[0]);
     });
