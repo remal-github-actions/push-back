@@ -27,7 +27,7 @@ inputs:
 
 outputs:
   result:
-    description: >-
+    description: |
       'nothing-changed' - no files were changed, nothing to commit;
       'remote-changed' - remote repository branch has been changed, push-back is skipped;
       'pushed-successfully' - pushed successfully;
