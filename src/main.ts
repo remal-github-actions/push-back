@@ -34,7 +34,9 @@ async function run(): Promise<void> {
         if (process.env.ACTIONS_STEP_DEBUG?.toLowerCase() === 'true') {
             require('debug').enable('simple-git')
         }
-        const git = simpleGit(workspacePath)
+        const git = simpleGit(workspacePath, {
+            timeout: {block: 300_000},
+        })
         const currentBranch = await getCurrentBranchName(git)
         const targetBranch = (function () {
             const targetBranchInput = core.getInput('targetBranch')
