@@ -22,6 +22,9 @@ jobs:
     - name: Sync with template repository
       uses: remal-github-actions/sync-with-template@v1
       if: ${{ env.PUSH_BACK_TOKEN }}
+      env:
+        ACTIONS_STEP_DEBUG: 'true'
+        DEBUG: 'simple-git,simple-git:*'
       with:
         githubToken: '${{ env.PUSH_BACK_TOKEN }}'
         templateRepository: '${{ secrets.TEMPLATE_REPOSITORY }}'
