@@ -21,8 +21,6 @@ jobs:
     steps:
     - name: Sync with template repository
       uses: remal-github-actions/sync-with-template@v1
-      env:
-        ACTIONS_STEP_DEBUG: true
       if: ${{ env.PUSH_BACK_TOKEN }}
       with:
         githubToken: '${{ env.PUSH_BACK_TOKEN }}'
