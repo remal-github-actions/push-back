@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import simpleGit from 'simple-git'
 import {SimpleGit} from 'simple-git/promise'
+import * as util from 'util'
 import {URL} from 'url'
 import workspacePath from './internal/workspacePath'
 
@@ -10,6 +11,12 @@ const RESULT = {
     NOTHING_CHANGED: 'nothing-changed',
     REMOTE_CHANGED: 'remote-changed',
     PUSHED_SUCCESSFULLY: 'pushed-successfully',
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+require('debug').log = function log(...args) {
+    return process.stdout.write(`${util.format(...args)}\n`)
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
