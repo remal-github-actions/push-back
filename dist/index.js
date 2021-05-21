@@ -48,12 +48,17 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const simple_git_1 = __importDefault(__nccwpck_require__(1477));
 const url_1 = __nccwpck_require__(8835);
+const util = __importStar(__nccwpck_require__(1669));
 const workspacePath_1 = __importDefault(__nccwpck_require__(3948));
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 const RESULT = {
     NOTHING_CHANGED: 'nothing-changed',
     REMOTE_CHANGED: 'remote-changed',
     PUSHED_SUCCESSFULLY: 'pushed-successfully',
+};
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+__nccwpck_require__(8231).log = function log(...args) {
+    return process.stdout.write(`${util.format(...args)}\n`);
 };
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 async function run() {
