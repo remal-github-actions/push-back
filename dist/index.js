@@ -2890,6 +2890,7 @@ function gitInstanceFactory(baseDir, options) {
     }
     config.progress && plugins.add(plugins_1.progressMonitorPlugin(config.progress));
     config.timeout && plugins.add(plugins_1.timeoutPlugin(config.timeout));
+    config.spawnOptions && plugins.add(plugins_1.spawnOptionsPlugin(config.spawnOptions));
     plugins.add(plugins_1.errorDetectionPlugin(plugins_1.errorDetectionHandler(true)));
     config.errors && plugins.add(plugins_1.errorDetectionPlugin(config.errors));
     return new Git(config, plugins);
@@ -3648,6 +3649,7 @@ __exportStar(__nccwpck_require__(6713), exports);
 __exportStar(__nccwpck_require__(5067), exports);
 __exportStar(__nccwpck_require__(1738), exports);
 __exportStar(__nccwpck_require__(8436), exports);
+__exportStar(__nccwpck_require__(9109), exports);
 __exportStar(__nccwpck_require__(9504), exports);
 //# sourceMappingURL=index.js.map
 
@@ -3747,6 +3749,28 @@ function progressEventStage(input) {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 //# sourceMappingURL=simple-git-plugin.js.map
+
+/***/ }),
+
+/***/ 9109:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.spawnOptionsPlugin = void 0;
+const utils_1 = __nccwpck_require__(847);
+function spawnOptionsPlugin(spawnOptions) {
+    const options = utils_1.pick(spawnOptions, ['uid', 'gid']);
+    return {
+        type: 'spawn.options',
+        action(data) {
+            return Object.assign(Object.assign({}, options), data);
+        },
+    };
+}
+exports.spawnOptionsPlugin = spawnOptionsPlugin;
+//# sourceMappingURL=spawn-options-plugin.js.map
 
 /***/ }),
 
@@ -4517,11 +4541,11 @@ class GitExecutorChain {
     gitResponse(task, command, args, outputHandler, logger) {
         return __awaiter(this, void 0, void 0, function* () {
             const outputLogger = logger.sibling('output');
-            const spawnOptions = {
+            const spawnOptions = this._plugins.exec('spawn.options', {
                 cwd: this.cwd,
                 env: this.env,
                 windowsHide: true,
-            };
+            }, pluginContext(task, task.commands));
             return new Promise((done) => {
                 const stdOut = [];
                 const stdErr = [];
@@ -6303,7 +6327,7 @@ exports.parseStringResponse = parseStringResponse;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.bufferToString = exports.prefixedArray = exports.asNumber = exports.asStringArray = exports.asArray = exports.objectToString = exports.remove = exports.including = exports.append = exports.folderExists = exports.forEachLineWithContent = exports.toLinesWithContent = exports.last = exports.first = exports.splitOn = exports.isUserFunction = exports.asFunction = exports.NOOP = void 0;
+exports.pick = exports.bufferToString = exports.prefixedArray = exports.asNumber = exports.asStringArray = exports.asArray = exports.objectToString = exports.remove = exports.including = exports.append = exports.folderExists = exports.forEachLineWithContent = exports.toLinesWithContent = exports.last = exports.first = exports.splitOn = exports.isUserFunction = exports.asFunction = exports.NOOP = void 0;
 const file_exists_1 = __nccwpck_require__(4751);
 const NOOP = () => {
 };
@@ -6434,6 +6458,13 @@ function bufferToString(input) {
     return (Array.isArray(input) ? Buffer.concat(input) : input).toString('utf-8');
 }
 exports.bufferToString = bufferToString;
+/**
+ * Get a new object from a source object with only the listed properties.
+ */
+function pick(source, properties) {
+    return Object.assign({}, ...properties.map((property) => property in source ? { [property]: source[property] } : {}));
+}
+exports.pick = pick;
 //# sourceMappingURL=util.js.map
 
 /***/ }),
