@@ -5980,7 +5980,7 @@ function splitLine(result, lineStr) {
     if (handler) {
       handler(result, path);
     }
-    if (raw !== "##") {
+    if (raw !== "##" && raw !== "!!") {
       result.files.push(new FileStatusSummary(path, index, workingDir));
     }
   }
@@ -5996,6 +5996,7 @@ var init_StatusSummary = __esm({
         this.conflicted = [];
         this.created = [];
         this.deleted = [];
+        this.ignored = void 0;
         this.modified = [];
         this.renamed = [];
         this.files = [];
@@ -6026,6 +6027,9 @@ var init_StatusSummary = __esm({
         const renamed = renamedFile(file);
         append(result.renamed, renamed);
         append(result.modified, renamed.to);
+      }),
+      parser2("!" /* IGNORED */, "!" /* IGNORED */, (_result, _file) => {
+        append(_result.ignored = _result.ignored || [], _file);
       }),
       parser2("?" /* UNTRACKED */, "?" /* UNTRACKED */, (result, file) => append(result.not_added, file)),
       ...conflicts("A" /* ADDED */, "A" /* ADDED */, "U" /* UNMERGED */),
