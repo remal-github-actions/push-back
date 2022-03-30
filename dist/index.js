@@ -6469,13 +6469,16 @@ __export(clone_exports, {
   cloneMirrorTask: () => cloneMirrorTask,
   cloneTask: () => cloneTask
 });
+function disallowedCommand(command) {
+  return /^--upload-pack(=|$)/.test(command);
+}
 function cloneTask(repo, directory, customArgs) {
   const commands = ["clone", ...customArgs];
-  if (typeof repo === "string") {
-    commands.push(repo);
-  }
-  if (typeof directory === "string") {
-    commands.push(directory);
+  filterString(repo) && commands.push(repo);
+  filterString(directory) && commands.push(directory);
+  const banned = commands.find(disallowedCommand);
+  if (banned) {
+    return configurationErrorTask(`git.fetch: potential exploit argument blocked.`);
   }
   return straightThroughStringTask(commands);
 }
@@ -6624,7 +6627,7 @@ var fetch_exports = {};
 __export(fetch_exports, {
   fetchTask: () => fetchTask
 });
-function disallowedCommand(command) {
+function disallowedCommand2(command) {
   return /^--upload-pack(=|$)/.test(command);
 }
 function fetchTask(remote, branch, customArgs) {
@@ -6632,7 +6635,7 @@ function fetchTask(remote, branch, customArgs) {
   if (remote && branch) {
     commands.push(remote, branch);
   }
-  const banned = commands.find(disallowedCommand);
+  const banned = commands.find(disallowedCommand2);
   if (banned) {
     return configurationErrorTask(`git.fetch: potential exploit argument blocked.`);
   }
