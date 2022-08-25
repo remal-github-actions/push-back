@@ -185,7 +185,8 @@ async function run(): Promise<void> {
             }
 
         } catch (error) {
-            core.setFailed(error)
+            core.setFailed(error instanceof Error ? error : (error as object).toString())
+
         } finally {
             await core.group(`Removing '${pushRemoteName}' remote`, async () => {
                 await git.removeRemote(pushRemoteName)
@@ -200,7 +201,7 @@ async function run(): Promise<void> {
         }
 
     } catch (error) {
-        core.setFailed(error)
+        core.setFailed(error instanceof Error ? error : (error as object).toString())
     }
 }
 
