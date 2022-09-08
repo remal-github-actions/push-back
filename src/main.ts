@@ -38,7 +38,7 @@ async function run(): Promise<void> {
             .filter(line => line.length > 0)
 
 
-        if (process.env.ACTIONS_STEP_DEBUG?.toLowerCase() === 'true') {
+        if (core.isDebug()) {
             require('debug').enable('simple-git')
         }
         const git = simpleGit(workspacePath)
