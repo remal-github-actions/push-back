@@ -66,7 +66,6 @@ const RESULT = {
 };
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 async function run() {
-    var _a;
     try {
         const repositoryFullName = process.env.GITHUB_REPOSITORY;
         if (!repositoryFullName) {
@@ -78,7 +77,7 @@ async function run() {
         const files = core.getInput('files').split('\n')
             .map(line => line.trim())
             .filter(line => line.length > 0);
-        if (((_a = process.env.ACTIONS_STEP_DEBUG) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === 'true') {
+        if (core.isDebug()) {
             (__nccwpck_require__(8237).enable)('simple-git');
         }
         const git = (0, simple_git_1.default)(workspacePath_1.default);
