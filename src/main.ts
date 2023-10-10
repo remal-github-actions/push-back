@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
-import simpleGit from 'simple-git'
-import {SimpleGit} from 'simple-git/promise'
-import {URL} from 'url'
+import { simpleGit } from 'simple-git'
+import { SimpleGit } from 'simple-git/promise'
+import { URL } from 'url'
 import * as util from 'util'
 import workspacePath from './internal/workspacePath'
 
@@ -28,10 +28,10 @@ async function run(): Promise<void> {
             throw new Error('GITHUB_REPOSITORY not defined')
         }
 
-        const githubToken = core.getInput('githubToken', {required: true})
+        const githubToken = core.getInput('githubToken', { required: true })
         core.setSecret(githubToken)
 
-        const message = core.getInput('message', {required: true})
+        const message = core.getInput('message', { required: true })
 
         const files = core.getInput('files').split('\n')
             .map(line => line.trim())
@@ -43,13 +43,13 @@ async function run(): Promise<void> {
         }
         const git = simpleGit(workspacePath)
         const currentBranch = await getCurrentBranchName(git)
-        const targetBranch = (function () {
+        const targetBranch = (function() {
             const targetBranchInput = core.getInput('targetBranch')
             if (targetBranchInput) {
                 return targetBranchInput
             }
             if (currentBranch === 'HEAD') {
-                throw new Error("targetBranch' input parameter should be set, as HEAD is detached from any branch")
+                throw new Error('targetBranch\' input parameter should be set, as HEAD is detached from any branch')
             }
             return currentBranch
         })()
@@ -122,7 +122,7 @@ async function run(): Promise<void> {
                 const serverUrl = new URL(
                     process.env['GITHUB_SERVER_URL']
                     || process.env['GITHUB_URL']
-                    || 'https://github.com'
+                    || 'https://github.com',
                 )
                 core.debug(`Server URL: ${serverUrl}`)
                 const extraHeaderConfigKey = `http.${serverUrl.origin}/.extraheader`
@@ -142,7 +142,7 @@ async function run(): Promise<void> {
                 remoteUrl.hash = ''
                 await git.addRemote(
                     pushRemoteName,
-                    remoteUrl.toString()
+                    remoteUrl.toString(),
                 )
                 core.info(`Remote added: ${remoteUrl.toString()}`)
 
@@ -165,7 +165,7 @@ async function run(): Promise<void> {
                                 return true
                             }
                         } else {
-                            core.info("Target branch doesn't exist")
+                            core.info('Target branch doesn\'t exist')
                         }
 
                         await git.push(pushRemoteName, `HEAD:${targetBranch}`)
@@ -175,7 +175,7 @@ async function run(): Promise<void> {
                     }
 
                     return false
-                }
+                },
             )
             if (isRemoteChanged) {
                 core.warning(`Remote repository branch '${targetBranch}' has been changed, skipping push back`)
