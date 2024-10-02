@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
+import * as debug from 'debug'
 import { simpleGit } from 'simple-git'
 import { SimpleGit } from 'simple-git/promise'
 import { URL } from 'url'
-import * as util from 'util'
 import workspacePath from './internal/workspacePath'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -11,12 +11,6 @@ const RESULT = {
     NOTHING_CHANGED: 'nothing-changed',
     REMOTE_CHANGED: 'remote-changed',
     PUSHED_SUCCESSFULLY: 'pushed-successfully',
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-require('debug').log = function log(...args) {
-    return process.stdout.write(`${util.format(...args)}\n`)
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -39,7 +33,7 @@ async function run(): Promise<void> {
 
 
         if (core.isDebug()) {
-            require('debug').enable('simple-git')
+            debug.enable('simple-git')
         }
         const git = simpleGit(workspacePath)
         const currentBranch = await getCurrentBranchName(git)

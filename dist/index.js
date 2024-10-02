@@ -50,19 +50,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(7484));
+const debug = __importStar(__nccwpck_require__(2830));
 const simple_git_1 = __nccwpck_require__(9065);
 const url_1 = __nccwpck_require__(7016);
-const util = __importStar(__nccwpck_require__(9023));
 const workspacePath_1 = __importDefault(__nccwpck_require__(5111));
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 const RESULT = {
     NOTHING_CHANGED: 'nothing-changed',
     REMOTE_CHANGED: 'remote-changed',
     PUSHED_SUCCESSFULLY: 'pushed-successfully',
-};
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-(__nccwpck_require__(2830).log) = function log(...args) {
-    return process.stdout.write(`${util.format(...args)}\n`);
 };
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 async function run() {
@@ -78,7 +74,7 @@ async function run() {
             .map(line => line.trim())
             .filter(line => line.length > 0);
         if (core.isDebug()) {
-            (__nccwpck_require__(2830).enable)('simple-git');
+            debug.enable('simple-git');
         }
         const git = (0, simple_git_1.simpleGit)(workspacePath_1.default);
         const currentBranch = await getCurrentBranchName(git);
