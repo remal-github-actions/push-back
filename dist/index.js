@@ -11517,7 +11517,7 @@ async function run() {
     try {
         const repositoryFullName = process.env.GITHUB_REPOSITORY;
         if (!repositoryFullName) {
-            throw new Error('GITHUB_REPOSITORY not defined');
+            throw new Error(`GITHUB_REPOSITORY not defined`);
         }
         const githubToken = core.getInput('githubToken', { required: true });
         core.setSecret(githubToken);
@@ -11536,22 +11536,22 @@ async function run() {
                 return targetBranchInput;
             }
             if (currentBranch === 'HEAD') {
-                throw new Error('targetBranch\' input parameter should be set, as HEAD is detached from any branch');
+                throw new Error(`targetBranch input parameter should be set, as HEAD is detached from any branch`);
             }
             return currentBranch;
         })();
-        const filesToCommit = await core.group('Checking Git status', async () => {
+        const filesToCommit = await core.group(`Checking Git status`, async () => {
             const changedFiles = await git.status(files)
                 .then(response => response.files);
             core.info(`${changedFiles.length} files changed`);
             return changedFiles;
         });
         if (filesToCommit.length === 0) {
-            core.info('No files were changed, nothing to commit');
+            core.info(`No files were changed, nothing to commit`);
             core.setOutput('result', RESULT.NOTHING_CHANGED);
             return;
         }
-        const currentCommitSha = await core.group('Getting HEAD commit SHA', async () => {
+        const currentCommitSha = await core.group(`Getting HEAD commit SHA`, async () => {
             const sha = await getCurrentCommitSha(git);
             core.info(`HEAD commit SHA: ${sha}`);
             return sha;
@@ -11559,16 +11559,16 @@ async function run() {
         const pushRemoteName = 'push-back';
         const prevConfigValues = {};
         try {
-            await core.group('Configuring Git committer info', async () => {
+            await core.group(`Configuring Git committer info`, async () => {
                 const configuredName = await getGitConfig(git, 'user.name');
                 if (configuredName) {
                     core.debug(`Configured committer name: ${configuredName}`);
                     prevConfigValues['user.name'] = configuredName;
                 }
                 const name = core.getInput('committerName')
-                    || configuredName
-                    || process.env.GITHUB_ACTOR
-                    || repositoryFullName.split('/')[0];
+                    ?? configuredName
+                    ?? process.env.GITHUB_ACTOR
+                    ?? repositoryFullName.split('/')[0];
                 core.info(`Committer name: ${name}`);
                 await git.addConfig('user.name', name);
                 const configuredEmail = await getGitConfig(git, 'user.email');
@@ -11576,7 +11576,7 @@ async function run() {
                     core.debug(`Configured committer email: ${configuredEmail}`);
                     prevConfigValues['user.email'] = configuredEmail;
                 }
-                const email = core.getInput('committerEmail') || configuredEmail || `${name}@users.noreply.github.com`;
+                const email = core.getInput('committerEmail') ?? configuredEmail ?? `${name}@users.noreply.github.com`;
                 core.info(`Committer email: ${email}`);
                 await git.addConfig('user.email', email);
             });
@@ -11593,15 +11593,15 @@ async function run() {
                     throw new Error(`Remote already exists: ${pushRemoteName}`);
                 }
                 const serverUrl = new external_url_namespaceObject.URL(process.env['GITHUB_SERVER_URL']
-                    || process.env['GITHUB_URL']
-                    || 'https://github.com');
+                    ?? process.env['GITHUB_URL']
+                    ?? 'https://github.com');
                 core.debug(`Server URL: ${serverUrl}`);
                 const extraHeaderConfigKey = `http.${serverUrl.origin}/.extraheader`;
                 const configuredExtraHeader = await getGitConfig(git, extraHeaderConfigKey);
                 if (configuredExtraHeader) {
                     prevConfigValues[extraHeaderConfigKey] = configuredExtraHeader;
                 }
-                core.debug('Adding remote');
+                core.debug(`Adding remote`);
                 const remoteUrl = new external_url_namespaceObject.URL(serverUrl.toString());
                 if (!remoteUrl.pathname.endsWith('/')) {
                     remoteUrl.pathname += '/';
@@ -11611,7 +11611,7 @@ async function run() {
                 remoteUrl.hash = '';
                 await git.addRemote(pushRemoteName, remoteUrl.toString());
                 core.info(`Remote added: ${remoteUrl.toString()}`);
-                core.info('Setting up credentials');
+                core.info(`Setting up credentials`);
                 const basicCredentials = Buffer.from(`x-access-token:${githubToken}`, 'utf8').toString('base64');
                 core.setSecret(basicCredentials);
                 await git.addConfig(extraHeaderConfigKey, `Authorization: basic ${basicCredentials}`);
@@ -11627,7 +11627,7 @@ async function run() {
                         }
                     }
                     else {
-                        core.info('Target branch doesn\'t exist');
+                        core.info(`Target branch doesn't exist`);
                     }
                     await git.push(pushRemoteName, `HEAD:${targetBranch}`);
                 }
@@ -11645,13 +11645,13 @@ async function run() {
             }
         }
         catch (error) {
-            core.setFailed(error instanceof Error ? error : error.toString());
+            core.setFailed(error instanceof Error ? error : `${error}`);
         }
         finally {
             await core.group(`Removing '${pushRemoteName}' remote`, async () => {
                 await git.removeRemote(pushRemoteName);
             });
-            await core.group('Restoring previous config values', async () => {
+            await core.group(`Restoring previous config values`, async () => {
                 for (const key in prevConfigValues) {
                     const value = prevConfigValues[key];
                     await git.addConfig(key, value);
@@ -11660,7 +11660,7 @@ async function run() {
         }
     }
     catch (error) {
-        core.setFailed(error instanceof Error ? error : error.toString());
+        core.setFailed(error instanceof Error ? error : `${error}`);
         throw error;
     }
 }
