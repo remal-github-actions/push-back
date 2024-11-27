@@ -79,9 +79,9 @@ async function run(): Promise<void> {
                 }
 
                 const name = core.getInput('committerName')
-                    ?? configuredName
-                    ?? process.env.GITHUB_ACTOR
-                    ?? repositoryFullName.split('/')[0]
+                    || configuredName
+                    || process.env.GITHUB_ACTOR
+                    || repositoryFullName.split('/')[0]
                 core.info(`Committer name: ${name}`)
                 await git.addConfig('user.name', name)
 
@@ -91,7 +91,7 @@ async function run(): Promise<void> {
                     prevConfigValues['user.email'] = configuredEmail
                 }
 
-                const email = core.getInput('committerEmail') ?? configuredEmail ?? `${name}@users.noreply.github.com`
+                const email = core.getInput('committerEmail') || configuredEmail || `${name}@users.noreply.github.com`
                 core.info(`Committer email: ${email}`)
                 await git.addConfig('user.email', email)
             })
@@ -114,8 +114,8 @@ async function run(): Promise<void> {
 
                 const serverUrl = new URL(
                     process.env['GITHUB_SERVER_URL']
-                    ?? process.env['GITHUB_URL']
-                    ?? 'https://github.com',
+                    || process.env['GITHUB_URL']
+                    || 'https://github.com',
                 )
                 core.debug(`Server URL: ${serverUrl}`)
                 const extraHeaderConfigKey = `http.${serverUrl.origin}/.extraheader`
