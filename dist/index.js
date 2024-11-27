@@ -11566,9 +11566,9 @@ async function run() {
                     prevConfigValues['user.name'] = configuredName;
                 }
                 const name = core.getInput('committerName')
-                    ?? configuredName
-                    ?? process.env.GITHUB_ACTOR
-                    ?? repositoryFullName.split('/')[0];
+                    || configuredName
+                    || process.env.GITHUB_ACTOR
+                    || repositoryFullName.split('/')[0];
                 core.info(`Committer name: ${name}`);
                 await git.addConfig('user.name', name);
                 const configuredEmail = await getGitConfig(git, 'user.email');
@@ -11576,7 +11576,7 @@ async function run() {
                     core.debug(`Configured committer email: ${configuredEmail}`);
                     prevConfigValues['user.email'] = configuredEmail;
                 }
-                const email = core.getInput('committerEmail') ?? configuredEmail ?? `${name}@users.noreply.github.com`;
+                const email = core.getInput('committerEmail') || configuredEmail || `${name}@users.noreply.github.com`;
                 core.info(`Committer email: ${email}`);
                 await git.addConfig('user.email', email);
             });
@@ -11593,8 +11593,8 @@ async function run() {
                     throw new Error(`Remote already exists: ${pushRemoteName}`);
                 }
                 const serverUrl = new external_url_namespaceObject.URL(process.env['GITHUB_SERVER_URL']
-                    ?? process.env['GITHUB_URL']
-                    ?? 'https://github.com');
+                    || process.env['GITHUB_URL']
+                    || 'https://github.com');
                 core.debug(`Server URL: ${serverUrl}`);
                 const extraHeaderConfigKey = `http.${serverUrl.origin}/.extraheader`;
                 const configuredExtraHeader = await getGitConfig(git, extraHeaderConfigKey);
