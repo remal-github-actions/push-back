@@ -1,0 +1,75 @@
+name: Git commit & push
+description: Commits and pushes changes, reports whether anything was pushed
+version: 2
+
+inputs:
+  message:
+    description: Commit message
+    required: true
+  committerName:
+    description: Git user.name
+    required: false
+    default: 'github-actions[bot]'
+  committerEmail:
+    description: Git user.email
+    required: false
+    default: '41898282+github-actions[bot]@users.noreply.github.com'
+  dryRun:
+    description: Set to 'true' to disable Git push
+    required: true
+    default: 'false'
+
+outputs:
+  result:
+    value: ${{steps.commit.outputs.result}}
+    description: |
+      'nothing-changed' - no files were changed, nothing to commit;
+      'remote-changed' - remote repository branch has been changed, push-back is skipped;
+      'pushed-successfully' - pushed successfully;
+
+runs:
+  using: composite
+  steps:
+  - name: Configure git, commit & push
+    id: commit
+    shell: bash
+    run: |
+      set -euo pipefail
+
+      echo Configuring Git user...
+      git config user.name ${{inputs.committerName}}
+      git config user.email ${{inputs.committerEmail}}
+
+      echo Checking for changes...
+      if [[ -z $(git status --porcelain) ]]; then
+        echo No changes to commit.
+        echo "result=nothing-changed" >> $GITHUB_OUTPUT
+        exit 0
+      fi
+
+      echo Changes detected, staging...
+      git add --all
+
+      echo Committing...
+      git commit -m ${{inputs.message}}
+
+      echo Pushing...
+      set +e
+      push_output=$(git push ${{fromJSON(inputs.dryRun) && '--dry-run' || ''}} origin "HEAD:${{github.ref}}" 2>&1)
+      push_exit=$?
+      set -e
+
+      echo $push_output
+
+      if [[ $push_exit -eq 0 ]]; then
+        echo Push succeeded.
+        echo "result=pushed-successfully" >> $GITHUB_OUTPUT
+      else
+        if [[ $push_output == *non-fast-forward* ]] || [[ $push_output == *[rejected]* ]]; then
+          echo Push rejected because remote has new commits.
+          echo "result=remote-changed" >> $GITHUB_OUTPUT
+        else
+          echo Push failed for some other reason.
+          exit 1
+        fi
+      fi
