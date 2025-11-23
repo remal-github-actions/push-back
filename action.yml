@@ -16,7 +16,7 @@ inputs:
     default: '41898282+github-actions[bot]@users.noreply.github.com'
   dryRun:
     description: Set to 'true' to disable Git push
-    required: true
+    required: false
     default: 'false'
 
 outputs:
