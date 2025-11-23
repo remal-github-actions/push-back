@@ -37,8 +37,8 @@ runs:
       set -euo pipefail
 
       echo Configuring Git user...
-      git config user.name ${{inputs.committerName}}
-      git config user.email ${{inputs.committerEmail}}
+      git config user.name "${{inputs.committerName}}"
+      git config user.email "${{inputs.committerEmail}}"
 
       echo Checking for changes...
       if [[ -z $(git status --porcelain) ]]; then
@@ -51,7 +51,7 @@ runs:
       git add --all
 
       echo Committing...
-      git commit -m ${{inputs.message}}
+      git commit -m "${{inputs.message}}"
 
       echo Pushing...
       set +e
