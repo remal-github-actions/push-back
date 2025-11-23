@@ -34,6 +34,10 @@ jobs:
 
     # $$$sync-with-template-modifiable: validation $$$
 
+    - name: Generate a file to commit
+      run: |
+        echo "This is a test file" > test-file.txt
+
     - name: Run current action
       id: current
       uses: ./
