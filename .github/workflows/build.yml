@@ -56,11 +56,18 @@ jobs:
         dryRun: 'true'
         message: 'Test message'
 
-    # $$$sync-with-template-modifiable-end$$$
-
-
-    - name: Get version
-      id: version
+    -name: Validate output
       run: |
-        VERSION=$(yq '.version' action.yml)
-        echo "version=$VERSION" | tee -a $GITHUB_OUTPUT
+        if [ "${{steps.current.outputs.result}}" != "remote-changed" ]; then
+          echo "::error::Unexpected result: ${{steps.current.outputs.result}}"
+          exit 1
+        fi
+
+      # $$$sync-with-template-modifiable-end$$$
+
+
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(yq '.version' action.yml)
+          echo "version=$VERSION" | tee -a $GITHUB_OUTPUT
