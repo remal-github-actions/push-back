@@ -60,8 +60,6 @@ runs:
       push_exit=${PIPESTATUS[0]}
       set -e
 
-      echo $push_output
-
       if [[ $push_exit -eq 0 ]]; then
         echo Push succeeded.
         echo "result=pushed-successfully" >> $GITHUB_OUTPUT
