@@ -38,13 +38,18 @@ jobs:
       env:
         GITHUB_TOKEN: ${{secrets.PUSH_BACK_TOKEN}}
       run: |
+        PATH_IN_REPO=".last-build-date"
+        gh api \
+          --header "Accept: application/vnd.github+json" \
+          "/repos/${{github.repository}}/contents/$PATH_IN_REPO" > file.json
+        SHA=$(jq -r '.sha' file.json)
         gh api \
           --method PUT \
           --header "Accept: application/vnd.github+json" \
-          "/repos/${{github.repository}}/contents/.last-build-date" \
+          "/repos/${{github.repository}}/contents/$PATH_IN_REPO" \
           --field message="[push-back] origin change to test" \
           --field content="$(date +"%Y-%m-%d %H:%M:%S" | base64 -w0)" \
-          --field sha="${{github.sha}}"
+          --field sha="$SHA"
 
     - name: Generate a file to commit
       run: |
