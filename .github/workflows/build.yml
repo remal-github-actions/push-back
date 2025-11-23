@@ -44,6 +44,7 @@ jobs:
           "/repos/${{github.repository}}/contents/.last-build-date" \
           --field message="[push-back] origin change to test" \
           --field content="$(date +"%Y-%m-%d %H:%M:%S" | base64 -w0)"
+          --field sha="${{github.sha}}"
 
     - name: Generate a file to commit
       run: |
