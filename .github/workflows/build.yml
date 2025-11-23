@@ -39,6 +39,6 @@ jobs:
       uses: ./
       with:
         dryRun: 'true'
-        githubToken: ${{github.token}}
+        message: 'Test message'
 
     # $$$sync-with-template-modifiable-end$$$
