@@ -33,17 +33,37 @@ runs:
   - name: Configure git, commit & push
     id: commit
     shell: bash
+    env:
+      INPUT_MESSAGE: ${{inputs.message}}
+      INPUT_COMMITTER_NAME: ${{inputs.committerName}}
+      INPUT_COMMITTER_EMAIL: ${{inputs.committerEmail}}
+      INPUT_DRY_RUN: ${{inputs.dryRun}}
+      # Fail fast on any auth/credential prompt instead of hanging the runner.
+      GIT_TERMINAL_PROMPT: "0"
+      GIT_ASKPASS: /bin/true
+      SSH_ASKPASS: /bin/true
+      SSH_ASKPASS_REQUIRE: never
     run: |
       set -euo pipefail
 
+      if [[ "$GITHUB_REF" != refs/heads/* ]]; then
+        echo "::error::push-back requires a branch ref; got GITHUB_REF=$GITHUB_REF" >&2
+        exit 1
+      fi
+
+      if [[ -z "$INPUT_MESSAGE" ]]; then
+        echo "::error::message must not be empty" >&2
+        exit 1
+      fi
+
       echo Configuring Git user...
-      git config user.name "${{inputs.committerName}}"
-      git config user.email "${{inputs.committerEmail}}"
+      git config user.name "$INPUT_COMMITTER_NAME"
+      git config user.email "$INPUT_COMMITTER_EMAIL"
 
       echo Checking for changes...
       if [[ -z $(git status --porcelain) ]]; then
         echo No changes to commit.
-        echo "result=nothing-changed" >> $GITHUB_OUTPUT
+        echo "result=nothing-changed" >> "$GITHUB_OUTPUT"
         exit 0
       fi
 
@@ -54,26 +74,33 @@ runs:
       # leaving the index identical to HEAD even though the working tree looked dirty.
       if git diff --cached --quiet; then
         echo Changes were normalized away during staging, nothing to commit.
-        echo "result=nothing-changed" >> $GITHUB_OUTPUT
+        echo "result=nothing-changed" >> "$GITHUB_OUTPUT"
         exit 0
       fi
 
       echo Committing...
-      git commit -m "${{inputs.message}}"
+      git commit -m "$INPUT_MESSAGE"
 
       echo Pushing...
+      push_args=(origin "HEAD:$GITHUB_REF")
+      if [[ "$INPUT_DRY_RUN" == "true" ]]; then
+        push_args=(--dry-run "${push_args[@]}")
+      fi
+
       set +e
       push_log_file="$(mktemp)"
-      git push ${{fromJSON(inputs.dryRun) && '--dry-run' || ''}} origin "HEAD:${{github.ref}}" 2>&1 | tee "$push_log_file"
+      # `--porcelain` makes the per-ref status machine-parseable: rejected refs
+      # always start with `!`, regardless of locale.
+      git push --porcelain "${push_args[@]}" 2>&1 | tee "$push_log_file"
       push_exit=${PIPESTATUS[0]}
       set -e
 
       if [[ $push_exit -eq 0 ]]; then
         echo Push succeeded.
-        echo "result=pushed-successfully" >> $GITHUB_OUTPUT
-      elif grep -q "non-fast-forward" "$push_log_file" || grep -q "\[rejected\]" "$push_log_file"; then
-        echo Push rejected because remote has new commits.
-        echo "result=remote-changed" >> $GITHUB_OUTPUT
+        echo "result=pushed-successfully" >> "$GITHUB_OUTPUT"
+      elif grep -q '^!' "$push_log_file"; then
+        echo Push rejected by remote.
+        echo "result=remote-changed" >> "$GITHUB_OUTPUT"
       else
         echo Push failed for some other reason.
         exit 1
