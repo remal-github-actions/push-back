@@ -50,6 +50,14 @@ runs:
       echo Changes detected, staging...
       git add --all
 
+      # `git add` may normalize line endings (e.g. CRLF -> LF per .gitattributes),
+      # leaving the index identical to HEAD even though the working tree looked dirty.
+      if git diff --cached --quiet; then
+        echo Changes were normalized away during staging, nothing to commit.
+        echo "result=nothing-changed" >> $GITHUB_OUTPUT
+        exit 0
+      fi
+
       echo Committing...
       git commit -m "${{inputs.message}}"
 
