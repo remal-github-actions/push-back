@@ -64,9 +64,18 @@ jobs:
         message: 'Test message'
 
     - name: Validate output
+      env:
+        ACTUAL_RESULT: ${{steps.current.outputs.result}}
       run: |
-        if [ "${{steps.current.outputs.result}}" != "${{github.ref == 'refs/heads/main' && 'remote-changed' || 'pushed-successfully'}}" ]; then
-          echo "::error::Unexpected result: ${{steps.current.outputs.result}}"
+        if [ "$GITHUB_REF" == "refs/heads/main" ]; then
+          EXPECTED_RESULT="remote-changed"
+        elif [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+          EXPECTED_RESULT="remote-changed"
+        else
+          EXPECTED_RESULT="pushed-successfully"
+        fi
+        if [ "$ACTUAL_RESULT" != "$EXPECTED_RESULT" ]; then
+          echo "::error::Unexpected result: $ACTUAL_RESULT (expected: $EXPECTED_RESULT)"
           exit 1
         fi
 
