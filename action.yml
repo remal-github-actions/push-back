@@ -46,7 +46,11 @@ runs:
     run: |
       set -euo pipefail
 
-      if [[ "$GITHUB_REF" != refs/heads/* ]]; then
+      if [[ "$GITHUB_REF" == refs/heads/* ]]; then
+        TARGET_REF="$GITHUB_REF"
+      elif [[ -n "${GITHUB_HEAD_REF:-}" ]]; then
+        TARGET_REF="refs/heads/$GITHUB_HEAD_REF"
+      else
         echo "::error::push-back requires a branch ref; got GITHUB_REF=$GITHUB_REF" >&2
         exit 1
       fi
@@ -82,7 +86,7 @@ runs:
       git commit -m "$INPUT_MESSAGE"
 
       echo Pushing...
-      push_args=(origin "HEAD:$GITHUB_REF")
+      push_args=(origin "HEAD:$TARGET_REF")
       if [[ "$INPUT_DRY_RUN" == "true" ]]; then
         push_args=(--dry-run "${push_args[@]}")
       fi
